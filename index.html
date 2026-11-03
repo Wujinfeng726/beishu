@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#f3efe7"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="背书"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-180.png"/>
+<link rel="icon" href="icon-192.png"/>
+<title>背书小助手 · 教综默写</title>
+<style>
+:root{
+  --bg:#f3efe7; --card:#fffdf9; --ink:#2c2721; --muted:#8b8274;
+  --line:#e7e0d4; --accent:#2f7d6b; --accent-soft:#e6f0ec;
+  --warn:#a8482a; --warn-soft:#fdeee7; --gold:#b7791f;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:var(--accent)}
+.wrap{max-width:700px;margin:0 auto;padding:10px 14px 70px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 10px}
+.brand{font-weight:700;font-size:17px;letter-spacing:.3px}
+.streak{font-size:13px;color:var(--muted)}
+.tabs{position:sticky;top:0;z-index:30;display:flex;gap:4px;background:rgba(243,239,231,.95);backdrop-filter:blur(8px);padding:4px 0 8px;margin-bottom:8px}
+.tabs button{flex:1;padding:9px 0;border-radius:12px;font-size:14px;color:var(--muted);font-weight:600;transition:.15s}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(60,40,20,.09)}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;
+  box-shadow:0 1px 2px rgba(60,40,20,.04),0 8px 24px -16px rgba(60,40,20,.28)}
+.card-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-bottom:10px}
+.mini{font-size:12px;color:var(--muted);font-weight:400}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600}
+.pill.gold{background:#fbf1db;color:var(--gold)}
+.hero{background:linear-gradient(160deg,#fffdf9 0%,#f9f4e9 100%)}
+.hero-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+.big{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:10px 0 4px;line-height:1.25}
+.big small{font-size:14px;font-weight:600;color:var(--muted);margin:0 4px 0 2px}
+.sub{color:var(--muted);font-size:13px}
+.actions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.row2{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 15px;border-radius:14px;
+  background:#eee7dc;font-weight:600;font-size:15px;transition:.12s;white-space:nowrap}
+.btn:active{transform:scale(.985)}
+.btn.primary{background:var(--accent);color:#fff;box-shadow:0 6px 16px -10px var(--accent)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.btn.warn{background:var(--warn-soft);color:var(--warn)}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:10px}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn.flex1{flex:1}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.qitem{padding:12px 0;border-top:1px solid var(--line)}
+.qitem:first-child{border-top:0;padding-top:0}
+.qtext{font-size:15px;margin:4px 0 8px}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px;background:#efeadf;color:#6d6455;margin-right:6px}
+.status{font-size:11px;color:var(--muted)}
+.status.due{color:var(--warn);font-weight:600}
+.ans{background:#faf6ee;border-radius:12px;padding:10px 12px;font-size:15px;margin-top:8px;white-space:pre-wrap}
+mark.miss{background:#ffe0d3;color:#a63b1c;border-radius:3px;padding:0 1px}
+.drill-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.progress{height:5px;border-radius:99px;background:#e8e2d6;overflow:hidden;margin-bottom:14px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s}
+.qbig{font-size:21px;font-weight:700;line-height:1.45;margin:6px 0 14px}
+textarea{width:100%;min-height:130px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;font:inherit;line-height:1.7;resize:vertical;outline:none;transition:.15s}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.score{font-size:15px;font-weight:700;margin-bottom:4px}
+.score.good{color:var(--accent)}
+.score.mid{color:var(--gold)}
+.score.bad{color:var(--warn)}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.rates button{border-radius:14px;padding:12px 6px;font-weight:700;font-size:15px;line-height:1.3}
+.rates button small{display:block;font-weight:400;font-size:11px;opacity:.75;margin-top:3px}
+.r.bad{background:var(--warn-soft);color:var(--warn)}
+.r.mid{background:#fbf1db;color:var(--gold)}
+.r.good{background:var(--accent-soft);color:var(--accent)}
+.clause{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:#5f5749;padding:4px 0;border-top:1px dashed var(--line)}
+.clause:first-child{border-top:0}
+.cflag{flex:none;width:18px;font-weight:700}
+.cflag.ok{color:var(--accent)}
+.cflag.part{color:var(--gold)}
+.cflag.no{color:var(--warn)}
+details summary{cursor:pointer;color:var(--muted);font-size:13px;padding:4px 0;outline:none}
+details summary::-webkit-details-marker{display:none}
+.stat{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat div{background:#faf6ee;border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-size:22px;font-weight:800}
+.stat span{font-size:12px;color:var(--muted)}
+.bars{display:flex;align-items:flex-end;gap:5px;height:90px;margin-top:10px}
+.bars div{flex:1;background:#e4ddd0;border-radius:5px 5px 2px 2px;position:relative;min-height:3px}
+.bars div.has{background:var(--accent)}
+.bars div span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted)}
+.lab{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+input[type=text],input[type=number],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+  background:#fff;font:inherit;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.modal{position:fixed;inset:0;background:rgba(40,32,24,.4);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal.hidden{display:none}
+.modal-box{background:var(--card);border-radius:20px;padding:18px;width:100%;max-width:560px;max-height:86vh;overflow:auto}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:#2c2721;color:#fff;
+  padding:10px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:200}
+.toast.on{opacity:.95;transform:translate(-50%,0)}
+.empty{text-align:center;color:var(--muted);padding:34px 10px;font-size:14px}
+.hintbox{background:var(--accent-soft);color:#265f52;border-radius:12px;padding:9px 12px;font-size:13px;margin-bottom:10px}
+.kw{color:var(--accent);font-weight:600}
+@media (max-width:400px){ .big{font-size:25px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">🐟 背书小助手</div>
+    <div class="streak" id="streak"></div>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-act="tab" data-view="today">今日</button>
+    <button data-act="tab" data-view="bank">题库</button>
+    <button data-act="tab" data-view="stats">统计</button>
+    <button data-act="tab" data-view="more">设置</button>
+  </nav>
+  <main id="main"></main>
+</div>
+<div class="modal hidden" id="modal"><div class="modal-box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+
+/* ============ 基础工具 ============ */
+const KEY = "jiaozong_beishu_v1";
+const IV_DEFAULT = [1, 2, 4, 7, 15, 30, 60];
+const WEEK = ["周日","周一","周二","周三","周四","周五","周六"];
+const $ = (s, r) => (r || document).querySelector(s);
+
+const pad2 = n => String(n).padStart(2, "0");
+function todayStr(d) { d = d || new Date(); return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+function parseDate(s) { const p = s.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function addDays(s, n) { const d = parseDate(s); d.setDate(d.getDate() + n); return todayStr(d); }
+function daysBetween(a, b) { return Math.round((parseDate(b) - parseDate(a)) / 86400000); }
+function cnDate(s) { const d = parseDate(s); return (d.getMonth()+1) + "月" + d.getDate() + "日 " + WEEK[d.getDay()]; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function shuffle(a) { a = a.slice(); for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1900); }
+
+/* ============ 初始题库（教综高频考点，可删可改） ============ */
+const SEED = [
+["教育学","教育学成为一门独立学科的标志是什么？","1632年夸美纽斯出版《大教学论》。"],
+["教育学","被誉为「现代教育学之父」「科学教育学奠基人」的是谁？","赫尔巴特，1806年《普通教育学》标志教育学作为一门规范、独立学科正式诞生。"],
+["教育学","世界上最早专门论述教育问题的文献是哪一部？","《学记》，也是世界上最早的教育文献。"],
+["教育学","西方最早的教育理论著作是什么？","昆体良的《论演说家的教育》（又称《雄辩术原理》），也是西方第一部教学法著作。"],
+["教育学","首次把教育学作为一门独立学科提出来的是谁？","培根。"],
+["教育学","最早提出「教育遵循自然」的哲学家是谁？","亚里士多德，他首次提出教育遵循自然。"],
+["教育学","「白板说」和绅士教育由谁提出？","洛克，代表作《教育漫话》。"],
+["教育学","《爱弥儿》的作者是谁？他主张什么？","卢梭，主张自然主义教育。"],
+["教育学","首先提出「教育心理学化」口号的是谁？","裴斯泰洛齐。"],
+["教育学","「教育即生活」「学校即社会」「从做中学」是谁的观点？","杜威，现代教育代言人，主张儿童中心、经验中心、活动中心。"],
+["教育学","结构主义教学理论和发现学习由谁提出？","布鲁纳。"],
+["教育学","「发展性教学」及其五条教学原则由谁提出？","赞科夫，代表作《教学与发展》。"],
+["教育学","「范例教学」由谁提出？","瓦根舍因。"],
+["教育学","「掌握学习」理论由谁提出？","布卢姆，他还提出教育目标分类学（认知、情感、动作技能）。"],
+["教育学","教育的本质属性是什么？","教育是有目的地培养人的社会活动。"],
+["教育学","教育的社会属性包括哪些？","永恒性、历史性、相对独立性、继承性、长期性、民族性、生产性。"],
+["教育学","生物起源说的代表人物是谁？","利托尔诺、沛西·能。"],
+["教育学","心理起源说的代表人物是谁？","孟禄，认为教育起源于儿童对成人无意识的模仿。"],
+["教育学","劳动起源说的代表人物是谁？","米丁斯基、凯洛夫。"],
+["教育学","影响人身心发展的因素及其作用是什么？","遗传是物质前提；环境是现实条件；学校教育起主导作用；个体主观能动性是决定性因素。"],
+["教育学","个体身心发展的一般规律有哪些？","顺序性、阶段性、不平衡性、互补性、个别差异性。"],
+["教育学","「拔苗助长」违背了身心发展的哪条规律？","顺序性，教育要循序渐进。"],
+["教育学","抓住关键期进行教育，体现身心发展的什么规律？","不平衡性。"],
+["教育学","个人本位论的代表人物有哪些？","卢梭、裴斯泰洛齐、福禄贝尔、罗杰斯。"],
+["教育学","社会本位论的代表人物有哪些？","赫尔巴特、涂尔干、孔德、凯兴斯泰纳。"],
+["教育学","我国确立教育目的的依据是什么？","社会政治经济文化发展的需要、人的身心发展规律、马克思主义关于人的全面发展学说。"],
+["教育学","全面发展教育由哪几部分组成？各自地位如何？","德育是灵魂和统帅，智育是前提和基础，体育是物质基础，还有美育和劳动技术教育。"],
+["教育学","课程按内容组织方式分为哪两类？","分科课程与综合课程。"],
+["教育学","活动课程（经验课程）的代表人物是谁？","杜威、克伯屈。"],
+["教育学","课程计划包括哪些内容？","教学科目、学科顺序、课时分配、学年编制与学周安排。"],
+["教育学","编写教材、教学和评价的直接依据是什么？","课程标准。"],
+["教育学","教学过程的本质是什么？","一种特殊的认识过程，具有间接性、简捷性、教育性和引导性。"],
+["教育学","教学过程的基本规律有哪些？","间接经验与直接经验相统一；掌握知识与发展能力相统一；教师主导与学生主体相统一；传授知识与思想教育相统一。"],
+["教育学","「教学永远具有教育性」体现的是哪条教学规律？","传授知识与思想教育相统一的规律。"],
+["教育学","启发性教学原则的提出可追溯到哪些论述？","《学记》的「道而弗牵，强而弗抑，开而弗达」，以及孔子说的「不愤不启，不悱不发」。"],
+["教育学","「一把钥匙开一把锁」体现什么教学原则？","因材施教原则。"],
+["教育学","我国目前最基本的教学组织形式是什么？","班级授课制，由夸美纽斯系统论述。"],
+["教育学","道尔顿制的创立者是谁？","帕克赫斯特。"],
+["教育学","教学工作的中心环节是什么？","上课。"],
+["教育学","一堂好课的标准有哪些？","目标明确、内容正确、方法得当、表达清晰、组织严密、气氛热烈。"],
+["教育学","德育过程的基本规律有哪些？","知、情、意、行统一；促进学生思想内部矛盾积极转化；组织活动和交往；长期、反复、逐步提高。"],
+["教育学","德育原则有哪些？","导向性原则、疏导原则、尊重信任与严格要求相结合、知行统一、正面教育与纪律约束相结合、依靠积极因素克服消极因素、教育影响一致性与连贯性、因材施教、集体教育与个别教育相结合。"],
+["教育学","「长善救失」体现哪条德育原则？","依靠积极因素、克服消极因素的原则。"],
+["教育学","我国第一个正式颁布的学制是哪个？","壬寅学制（1902年），但未实施。"],
+["教育学","我国第一个正式实施的学制是哪个？","癸卯学制（1904年）。"],
+["教育学","第一次规定男女同校的学制是哪个？","壬子癸丑学制（1912—1913年）。"],
+["教育学","1922年的「六三三」学制是哪个学制？","壬戌学制，以美国学制为蓝本。"],
+["教育学","义务教育有哪些特征？","强制性、免费性、普及性。"],
+["教育学","教师劳动的特点有哪些？","复杂性、创造性；连续性、广延性；长期性、间接性；主体性、示范性；方式的个体性和成果的群体性。"],
+["教育学","教师专业发展的三阶段理论由谁提出？分为哪三阶段？","福勒和布朗，分为关注生存、关注情境、关注学生三个阶段。"],
+["教育学","新型师生关系的特点是什么？","尊师爱生、民主平等、教学相长、心理相容。"],
+["教育学","教师职业道德规范包括哪些内容？","爱国守法、爱岗敬业、关爱学生、教书育人、为人师表、终身学习。"],
+["心理学","科学心理学诞生的标志是什么？","1879年冯特在德国莱比锡大学建立世界上第一个心理学实验室。"],
+["心理学","行为主义心理学的代表人物是谁？","华生，主张研究行为、反对研究意识。"],
+["心理学","知觉的基本特性有哪些？","选择性、整体性、理解性、恒常性。"],
+["心理学","注意的品质包括哪些？","注意的范围、稳定性、分配和转移。"],
+["心理学","注意分为哪几类？","无意注意、有意注意、有意后注意。"],
+["心理学","艾宾浩斯遗忘曲线揭示了什么规律？","遗忘先快后慢、先多后少，呈负加速。"],
+["心理学","遗忘理论主要有哪些？","衰退说、干扰说（前摄抑制与倒摄抑制）、压抑说（动机说）、提取失败说、同化说。"],
+["心理学","有效组织复习的方法有哪些？","及时复习、分散复习与集中复习相结合、反复阅读与试图回忆相结合、适当过度学习（150%）、多种感官参与。"],
+["心理学","马斯洛需要层次理论包括哪些层次？","生理、安全、归属与爱、尊重、自我实现，前四层为缺失性需要，最高层为成长性需要。"],
+["心理学","耶克斯—多德森定律的内容是什么？","动机强度与学习效率呈倒U形曲线，中等动机最有利，任务越难最佳动机水平越低。"],
+["心理学","韦纳成败归因理论的三个维度是什么？","内部与外部、稳定与不稳定、可控与不可控；常见原因有能力、努力、任务难度、运气。"],
+["心理学","自我效能感由谁提出？","班杜拉，指人对自己能否成功完成某一行为的主观判断。"],
+["心理学","加德纳的智力理论是什么？","多元智能理论，包括言语、逻辑数学、视觉空间、音乐、身体运动、人际、内省、自然观察等智能。"],
+["心理学","斯皮尔曼的智力理论是什么？","二因素论，包括一般因素G和特殊因素S。"],
+["心理学","气质类型分为哪四种？","胆汁质、多血质、黏液质、抑郁质。"],
+["心理学","皮亚杰认知发展阶段分为哪四个阶段？","感知运动阶段（0—2岁）、前运算阶段（2—7岁）、具体运算阶段（7—11岁）、形式运算阶段（11—16岁）。"],
+["心理学","科尔伯格道德发展的三水平六阶段是什么？","前习俗水平（惩罚服从、相对功利）、习俗水平（好孩子、维护权威秩序）、后习俗水平（社会契约、普遍伦理原则）。"],
+["心理学","维果茨基的「最近发展区」指什么？","儿童现有发展水平与在成人帮助下可能达到的水平之间的差距，教学应走在发展前面。"],
+["教育心理学","桑代克尝试错误说的三条学习律是什么？","准备律、练习律、效果律。"],
+["教育心理学","斯金纳操作性条件作用的核心概念有哪些？","正强化、负强化、惩罚、消退。"],
+["教育心理学","班杜拉社会学习理论的主要内容是什么？","观察学习包括注意、保持、再现、动机四个过程，强调替代强化与自我强化。"],
+["教育心理学","奥苏贝尔的有意义接受学习理论主张什么？","学习的实质是有意义学习，主张采用先行组织者策略。"],
+["教育心理学","建构主义的学习观是什么？","学习是主动建构的过程，具有社会互动性和情境性。"],
+["教育心理学","奥苏贝尔把学习动机分为哪三种内驱力？","认知内驱力、自我提高内驱力、附属内驱力。"],
+["教育心理学","学习迁移的主要理论有哪些？","形式训练说、共同要素说（桑代克）、概括化理论（贾德）、关系转换说（苛勒）、认知结构迁移理论（奥苏贝尔）。"],
+["教育心理学","操作技能的形成分为哪几个阶段？","操作定向、操作模仿、操作整合、操作熟练，练习中会出现高原现象。"],
+["教育心理学","冯忠良心智技能形成的三阶段是什么？","原型定向、原型操作、原型内化。"],
+["教育心理学","学习策略分为哪几类？","认知策略（复述、精加工、组织）、元认知策略、资源管理策略。"],
+["教育心理学","影响问题解决的因素有哪些？","知识经验、定势与功能固着、问题情境、原型启发、动机与情绪状态。"],
+["教育心理学","创造性思维的核心是什么？其特点有哪些？","发散思维，特点是流畅性、变通性、独创性。"],
+["教育心理学","心理健康的标准有哪些？","智力正常、情绪适中、意志健全、人格统一、人际关系和谐、社会适应良好等。"],
+["教育心理学","心理辅导的常用方法有哪些？","倾听、共情、积极关注，以及行为改变法（强化、代币、系统脱敏）和认知疗法（理性情绪疗法）。"],
+["教育心理学","教育实验法中的变量有哪些？","自变量、因变量和需要控制的无关变量。"]
+];
+
+/* ============ 状态 ============ */
+let state = null;
+let drill = null;
+let STORAGE_OK = true;
+try { localStorage.setItem("__probe__", "1"); localStorage.removeItem("__probe__"); }
+catch (e) { STORAGE_OK = false; }
+
+function newCard(q, a, sub) {
+  return { id: uid(), q: q, a: a, sub: sub || "未分类", seen: false, stage: 0, due: null,
+           reps: 0, ok: 0, bad: 0, lapses: 0, last: null, created: Date.now(), archived: false };
+}
+function seedState() {
+  return {
+    v: 1,
+    createdAt: todayStr(),
+    settings: { newPerDay: 10, reviewCap: 80, intervals: IV_DEFAULT.slice() },
+    cards: SEED.map(x => newCard(x[1], x[2], x[0])),
+    daily: {},
+    ui: { view: "today", q: "", sub: "all" }
+  };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || !Array.isArray(s.cards)) return null;
+    s.settings = Object.assign({ newPerDay: 10, reviewCap: 80, intervals: IV_DEFAULT.slice() }, s.settings || {});
+    if (!Array.isArray(s.settings.intervals) || !s.settings.intervals.length) s.settings.intervals = IV_DEFAULT.slice();
+    s.daily = s.daily || {};
+    s.ui = Object.assign({ view: "today", q: "", sub: "all" }, s.ui || {});
+    s.createdAt = s.createdAt || todayStr();
+    s.cards.forEach(c => { if (typeof c.seen !== "boolean") c.seen = c.stage > 0; });
+    return s;
+  } catch (e) { return null; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { toast("存不下了，去设置里导出备份一下"); }
+}
+function cardById(id) { return state.cards.find(c => c.id === id); }
+
+/* ============ 派生数据 ============ */
+function dueList() {
+  const t = todayStr();
+  return state.cards.filter(c => !c.archived && c.seen && c.due && c.due <= t)
+    .sort((a, b) => (a.due === b.due ? (b.lapses - a.lapses) : (a.due < b.due ? -1 : 1)));
+}
+function newList() { return state.cards.filter(c => !c.archived && !c.seen); }
+function todayLog() {
+  const t = todayStr();
+  return state.daily[t] || (state.daily[t] = { "new": 0, rev: 0, ok: 0, bad: 0, ms: 0 });
+}
+function streak() {
+  let n = 0, d = todayStr();
+  const has = x => { const L = state.daily[x]; return L && (L["new"] + L.rev) > 0; };
+  if (!has(d)) d = addDays(d, -1);
+  while (has(d) && n < 4000) { n++; d = addDays(d, -1); }
+  return n;
+}
+function masteredCount() { const L = state.settings.intervals.length - 1; return state.cards.filter(c => c.seen && c.stage >= L).length; }
+function accToday() { const L = state.daily[todayStr()]; if (!L) return 0; const n = L.ok + L.bad; return n ? Math.round(L.ok * 100 / n) : 0; }
+
+/* ============ 科学记忆调度 ============ */
+function leaveDays(card, level) {
+  const iv = state.settings.intervals;
+  if (!card.seen) return level === 3 ? iv[0] : 1;
+  if (level === 3) return iv[Math.min(card.stage + 1, iv.length - 1)];
+  if (level === 2) return Math.max(1, Math.round(iv[Math.min(card.stage, iv.length - 1)] / 2));
+  return 1;
+}
+function applyGrade(card, level, kind) {
+  const t = todayStr(), iv = state.settings.intervals;
+  const wasNew = !card.seen;
+  const gap = leaveDays(card, level); // 必须在改动 seen/stage 之前算
+  card.seen = true;
+  card.reps = (card.reps || 0) + 1;
+  if (wasNew) {
+    card.stage = 0;
+    if (level === 1) { card.lapses++; card.bad++; }
+    else if (level === 3) card.ok++;
+  } else {
+    if (level === 3) { card.stage = Math.min(card.stage + 1, iv.length - 1); card.ok++; }
+    else if (level === 2) { /* 间隔减半，过几天再见一次 */ }
+    else { card.lapses++; card.bad++; card.stage = 0; }
+  }
+  card.due = addDays(t, gap);
+  card.last = t;
+  const L = todayLog();
+  if (kind === "new") L["new"]++; else L.rev++;
+  if (level === 3) L.ok++;
+  if (level === 1) L.bad++;
+  save();
+}
+function dueText(d) {
+  const n = daysBetween(todayStr(), d);
+  const rel = n <= 0 ? "今天" : n === 1 ? "明天" : n + "天后";
+  return rel + "（" + cnDate(d) + "）";
+}
+
+/* ============ 默写判分 ============ */
+const WORD_RE = /[0-9A-Za-z\u4e00-\u9fa5]/;
+function isW(ch) { return WORD_RE.test(ch); }
+function gradeAnswer(ans, input) {
+  const A = Array.from(ans), B = Array.from(input);
+  const ai = [], bi = [];
+  A.forEach((ch, i) => { if (isW(ch)) ai.push(i); });
+  B.forEach((ch, i) => { if (isW(ch)) bi.push(i); });
+  const a = ai.map(i => A[i].toLowerCase()), b = bi.map(i => B[i].toLowerCase());
+  const n = a.length, m = b.length;
+  const dp = new Array(n + 1);
+  for (let i = 0; i <= n; i++) dp[i] = new Uint16Array(m + 1);
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const matched = new Set();
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { matched.add(ai[i]); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  const cover = n ? matched.size / n : 0;
+  const clauses = [];
+  let prev = 0;
+  const cut = [];
+  for (let k = 0; k < ans.length; k++) if (/[；;。\n]/.test(ans[k])) cut.push(k);
+  cut.push(ans.length);
+  cut.forEach(s => {
+    const text = ans.slice(prev, s).trim();
+    if (text) {
+      let tot = 0, hit = 0;
+      for (let k = prev; k < s; k++) if (isW(ans[k])) { tot++; if (matched.has(k)) hit++; }
+      if (tot) clauses.push({ text: text, ratio: hit / tot });
+    }
+    prev = s + 1;
+  });
+  return { cover: cover, matched: matched, clauses: clauses };
+}
+function diffHTML(ans, matched) {
+  let out = "", buf = "";
+  const flush = () => { if (buf) { out += '<mark class="miss">' + esc(buf) + "</mark>"; buf = ""; } };
+  Array.from(ans).forEach((ch, i) => {
+    if (isW(ch) && matched.has(i)) { flush(); out += esc(ch); }
+    else if (isW(ch)) buf += ch;
+    else { flush(); out += esc(ch); }
+  });
+  flush();
+  return out;
+}
+
+/* ============ 会话 ============ */
+function startSession(mode) {
+  const t = todayStr();
+  const quota = Math.max(0, (state.settings.newPerDay || 10) - todayLog()["new"]);
+  const cap = state.settings.reviewCap || 80;
+  const mk = c => ({ cid: c.id, mode: c.seen ? "review" : "new" });
+  let list = [];
+  if (mode === "today") list = dueList().slice(0, cap).map(mk).concat(newList().slice(0, quota).map(mk));
+  else if (mode === "review") list = dueList().slice(0, cap).map(mk);
+  else if (mode === "new") list = newList().slice(0, quota).map(mk);
+  else if (mode === "random") list = shuffle(state.cards.filter(c => !c.archived && c.seen)).slice(0, 20).map(mk);
+  else if (mode === "wrong") list = shuffle(state.cards.filter(c => !c.archived && c.bad > 0)).slice(0, 15).map(mk);
+  if (!list.length) { toast("这一队没卡，换一个模式试试"); return; }
+  drill = { items: list, i: 0, phase: list[0].mode === "new" ? "learn" : "write",
+            input: "", hint: false, revealed: false, result: null,
+            t0: Date.now(), ok: 0, bad: 0, total: 0, forgot: [], done: false };
+  render();
+  window.scrollTo(0, 0);
+}
+function advance() {
+  drill.i++;
+  drill.input = ""; drill.hint = false; drill.revealed = false; drill.result = null;
+  if (drill.i >= drill.items.length) { drill.done = true; drill.phase = "done"; }
+  else drill.phase = drill.items[drill.i].mode === "new" ? "learn" : "write";
+  render();
+  window.scrollTo(0, 0);
+}
+function submitAnswer() {
+  if (!drill.input.trim()) { toast("先写几个字嘛，空着交不算数"); return; }
+  const c = cardById(drill.items[drill.i].cid);
+  drill.result = gradeAnswer(c.a, drill.input);
+  drill.phase = "result";
+  render();
+}
+function rate(level) {
+  const it = drill.items[drill.i], c = cardById(it.cid);
+  applyGrade(c, level, it.mode);
+  drill.total++;
+  if (level === 3) drill.ok++;
+  if (level === 1) { drill.bad++; drill.forgot.push(c.id); }
+  save();
+  advance();
+}
+
+/* ============ 渲染 ============ */
+function render() {
+  const tabs = $("#tabs");
+  tabs.style.display = drill ? "none" : "flex";
+  const st = streak();
+  $("#streak").textContent = st > 0 ? "🔥 连续 " + st + " 天" : "";
+  if (drill) { renderDrill(); return; }
+  tabs.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.view === state.ui.view));
+  const main = $("#main");
+  if (state.ui.view === "today") main.innerHTML = htmlToday();
+  else if (state.ui.view === "bank") main.innerHTML = htmlBank();
+  else if (state.ui.view === "stats") main.innerHTML = htmlStats();
+  else main.innerHTML = htmlMore();
+  if (!STORAGE_OK && main.insertAdjacentHTML) {
+    main.insertAdjacentHTML("afterbegin",
+      '<div class="card" style="background:#fdeee7;color:#a8482a;font-size:13px">⚠️ 这个浏览器不让本地保存，关掉页面进度就没了。用 Chrome / Edge 打开，或者每次从设置里导出备份。</div>');
+  }
+}
+function htmlToday() {
+  const t = todayStr();
+  const L = state.daily[t] || { "new": 0, rev: 0, ok: 0, bad: 0 };
+  const due = dueList();
+  const quota = Math.max(0, (state.settings.newPerDay || 10) - L["new"]);
+  const news = newList();
+  const take = news.slice(0, quota);
+  const total = due.length + take.length;
+  const wrongN = state.cards.filter(c => !c.archived && c.bad > 0).length;
+  const seen = state.cards.filter(c => !c.archived && c.seen).length;
+  const acc = accToday();
+  const allN = state.cards.filter(c => !c.archived).length;
+  let preview = "";
+  if (due.length) {
+    preview = '<div class="card"><div class="card-head"><span>接下来要复习</span><span class="mini">' + due.length + " 张</span></div>" +
+      due.slice(0, 5).map(c => {
+        const late = daysBetween(c.due, t);
+        return '<div class="qitem"><div><span class="tag">' + esc(c.sub) + "</span>" +
+          (late > 0 ? '<span class="status due">逾期 ' + late + " 天</span>" : '<span class="status">今天到期</span>') +
+          '</div><div class="qtext">' + esc(c.q) + "</div></div>";
+      }).join("") +
+      (due.length > 5 ? '<div class="mini" style="text-align:right">还有 ' + (due.length - 5) + " 张…</div>" : "") + "</div>";
+  }
+  return '' +
+  '<div class="card hero">' +
+    '<div class="hero-top"><span>' + cnDate(t) + '</span>' +
+      '<span class="pill' + (total ? "" : " gold") + '">' + (total ? "今日待办" : "今日清空") + "</span></div>" +
+    '<div class="big">' + (total
+      ? due.length + '<small>张复习</small> + ' + take.length + '<small>张新学</small>'
+      : "没有要背的啦") + "</div>" +
+    '<div class="sub">已学 ' + seen + "/" + allN + " · 已掌握 " + masteredCount() +
+      " · 今日正确率 " + acc + "%</div>" +
+    '<div class="actions">' +
+      '<button class="btn primary block" data-act="start" data-mode="' + (total ? "today" : "random") + '">' +
+        (total ? "开始今日任务（" + total + " 张）" : "随机刷 20 张") + "</button>" +
+      '<div class="row2">' +
+        '<button class="btn flex1" data-act="start" data-mode="review"' + (due.length ? "" : " disabled") + ">只复习 " + due.length + "</button>" +
+        '<button class="btn flex1" data-act="start" data-mode="new"' + (take.length ? "" : " disabled") + ">学新的 " + take.length + "</button>" +
+        '<button class="btn flex1" data-act="start" data-mode="wrong"' + (wrongN ? "" : " disabled") + ">错题本 " + wrongN + "</button>" +
+      "</div>" +
+    "</div>" +
+  "</div>" +
+  preview +
+  '<div class="card"><div class="card-head"><span>今天已完成</span><span class="mini">新学 ' + L["new"] + " · 复习 " + L.rev + "</span></div>" +
+    '<div class="bars" style="height:56px">' +
+      [0,1,2,3,4,5,6].map(k => {
+        const d = addDays(t, k - 6), X = state.daily[d] || {};
+        const v = (X["new"] || 0) + (X.rev || 0);
+        const h = Math.min(1, v / 30) * 100;
+        return '<div class="' + (v ? "has" : "") + '" style="height:' + Math.max(6, h) + '%" title="' + d + " " + v + ' 张"></div>';
+      }).join("") +
+    "</div>" +
+    '<div class="mini" style="margin-top:22px">近 7 天完成量</div></div>' +
+  '<details class="card"><summary>🐟 这个复习计划是怎么排的？</summary>' +
+    "<p style=\"font-size:14px;color:#5f5749\">每张卡第一次学完，会在 <b>第 1、2、4、7、15、30、60 天</b> 各复习一次，间隔逐次拉长——这是艾宾浩斯遗忘曲线最常用的落地排法（遗忘先快后慢，所以前期密集、后期稀疏）。</p>" +
+    "<p style=\"font-size:14px;color:#5f5749\">默写自评「忘了」→ 明天重来、重新走一遍间隔；「模糊」→ 间隔减半再见一次；「记得」→ 往后推一级。每天新学有上限，是防止一口气塞太多、第二天全忘。</p>" +
+    "</details>";
+}
+function htmlBank() {
+  const subs = Array.from(new Set(state.cards.map(c => c.sub)));
+  const opts = ['<option value="all">全部学科</option>'].concat(subs.map(s => '<option value="' + esc(s) + '"' + (state.ui.sub === s ? " selected" : "") + ">" + esc(s) + "</option>")).join("");
+  return '<div class="card">' +
+    '<div class="card-head"><span>题库</span><span class="mini">共 ' + state.cards.length + " 张</span></div>" +
+    '<input type="text" id="bankSearch" placeholder="搜问题或答案…" value="' + esc(state.ui.q) + '"/>' +
+    '<select id="bankSub" style="margin-top:8px">' + opts + "</select>" +
+    '<div class="row2" style="margin-top:10px">' +
+      '<button class="btn sm flex1" data-act="addcard">+ 新增一条</button>' +
+      '<button class="btn sm flex1" data-act="openImport">批量导入</button>' +
+    "</div></div>" +
+    '<div class="card" id="bankList">' + bankListHTML() + "</div>";
+}
+function bankListHTML() {
+  const q = (state.ui.q || "").trim().toLowerCase();
+  const sub = state.ui.sub || "all";
+  const L = state.settings.intervals.length - 1;
+  let list = state.cards.filter(c => !c.archived);
+  if (sub !== "all") list = list.filter(c => c.sub === sub);
+  if (q) list = list.filter(c => (c.q + c.a).toLowerCase().includes(q));
+  if (!list.length) return '<div class="empty">没有匹配的卡片</div>';
+  return list.slice(0, 400).map(c => {
+    const st = !c.seen ? "未学" : (c.stage >= L ? "已掌握" : "第 " + (c.stage + 1) + " 轮");
+    const due = c.seen && c.due ? (c.due <= todayStr() ? '<span class="status due">该复习了</span>' : '<span class="status">' + dueText(c.due) + "</span>") : "";
+    return '<div class="qitem">' +
+      '<div><span class="tag">' + esc(c.sub) + '</span><span class="status">' + st + "</span> " + due + "</div>" +
+      '<div class="qtext">' + esc(c.q) + "</div>" +
+      '<details><summary>看答案</summary><div class="ans">' + esc(c.a) + "</div></details>" +
+      '<div class="row2" style="margin-top:6px">' +
+        '<button class="btn sm" data-act="editcard" data-id="' + c.id + '">改</button>' +
+        '<button class="btn sm warn" data-act="delcard" data-id="' + c.id + '">删</button>' +
+        '<button class="btn sm" data-act="practice" data-id="' + c.id + '">单练</button>' +
+      "</div></div>";
+  }).join("");
+}
+function htmlStats() {
+  const t = todayStr();
+  const all = state.cards.filter(c => !c.archived);
+  const seen = all.filter(c => c.seen);
+  let days = 0, sumOk = 0, sumBad = 0, n = 0;
+  Object.keys(state.daily).forEach(k => { const L = state.daily[k]; if ((L["new"] + L.rev) > 0) { days++; sumOk += L.ok; sumBad += L.bad; n++; } });
+  const accAll = (sumOk + sumBad) ? Math.round(sumOk * 100 / (sumOk + sumBad)) : 0;
+  const last14 = [];
+  for (let k = 13; k >= 0; k--) { const d = addDays(t, -k); const L = state.daily[d] || {}; last14.push({ d: d, v: (L["new"] || 0) + (L.rev || 0) }); }
+  const max = Math.max(10, Math.max.apply(null, last14.map(x => x.v)));
+  const forecast = [];
+  for (let k = 0; k < 7; k++) {
+    const d = addDays(t, k);
+    forecast.push({ d: d, v: seen.filter(c => c.due && c.due <= d).length });
+  }
+  const subs = {};
+  all.forEach(c => { subs[c.sub] = (subs[c.sub] || 0) + 1; });
+  return '<div class="card"><div class="card-head"><span>总览</span><span class="mini">从 ' + state.createdAt + " 开始</span></div>" +
+    '<div class="stat">' +
+      "<div><b>" + all.length + "</b><span>总卡片</span></div>" +
+      "<div><b>" + masteredCount() + "</b><span>已掌握</span></div>" +
+      "<div><b>" + (seen.length - masteredCount()) + "</b><span>学习中</span></div>" +
+      "<div><b>" + accAll + "%</b><span>历史正确率</span></div>" +
+    "</div></div>" +
+    '<div class="card"><div class="card-head"><span>近 14 天</span><span class="mini">共打卡 ' + days + " 天 · 连续 " + streak() + " 天</span></div>" +
+      '<div class="bars">' + last14.map(x =>
+        '<div class="' + (x.v ? "has" : "") + '" style="height:' + Math.max(4, x.v / max * 100) + '%"><span>' + x.d.slice(5) + "</span></div>").join("") + "</div>" +
+      '<div style="height:16px"></div></div>' +
+    '<div class="card"><div class="card-head"><span>未来 7 天累计待复习</span></div>' +
+      forecast.map((x, k) => '<div class="qitem" style="display:flex;justify-content:space-between;padding:8px 0">' +
+        "<span>" + (k === 0 ? "今天" : cnDate(x.d)) + '</span><b>' + x.v + " 张</b></div>").join("") + "</div>" +
+    '<div class="card"><div class="card-head"><span>学科分布</span></div>' +
+      Object.keys(subs).map(s => '<div class="qitem" style="display:flex;justify-content:space-between;padding:8px 0">' +
+        "<span>" + esc(s) + "</span><b>" + subs[s] + " 张</b></div>").join("") + "</div>";
+}
+function htmlMore() {
+  const s = state.settings;
+  return '<div class="card"><div class="card-head"><span>每天背多少</span></div>' +
+    '<label class="lab">每日新学上限（张）</label><input type="number" id="setNew" min="1" max="100" value="' + s.newPerDay + '"/>' +
+    '<label class="lab">单次复习上限（张）</label><input type="number" id="setCap" min="5" max="300" value="' + s.reviewCap + '"/>' +
+    '<label class="lab">复习间隔（天，逗号分隔）</label><input type="text" id="setIv" value="' + s.intervals.join(",") + '"/>' +
+    '<div class="row2" style="margin-top:12px"><button class="btn primary flex1" data-act="saveSettings">保存</button></div></div>' +
+    '<div class="card"><div class="card-head"><span>数据</span></div>' +
+    '<p class="mini" style="margin-top:0">数据存在这台设备的浏览器里。换设备、清缓存前先导出备份，别丢了。</p>' +
+    '<div class="row2"><button class="btn flex1" data-act="export">导出备份</button>' +
+    '<button class="btn flex1" data-act="importJson">导入备份</button></div>' +
+    '<div class="row2" style="margin-top:8px"><button class="btn warn flex1" data-act="reset">清空所有数据</button></div></div>' +
+    '<div class="card"><div class="card-head"><span>批量导入格式</span></div>' +
+    '<p class="mini" style="margin-top:0">一行一张卡，问题与答案用竖线隔开；以 # 开头的行为学科名。</p>' +
+    '<pre style="background:#faf6ee;border-radius:12px;padding:10px;font-size:12px;overflow:auto"># 教育学\n教育的本质属性是什么？ | 有目的地培养人的社会活动\n# 心理学\n遗忘曲线的规律？ | 先快后慢，负加速</pre>' +
+    '<button class="btn sm" data-act="openImport">去导入</button></div>';
+}
+function renderDrill() {
+  const main = $("#main");
+  if (drill.done) { main.innerHTML = htmlSummary(); return; }
+  const it = drill.items[drill.i];
+  const c = cardById(it.cid);
+  if (!c) { drill.done = true; main.innerHTML = htmlSummary(); return; }
+  const pct = Math.round(drill.i / drill.items.length * 100);
+  const head = '<div class="drill-top"><span class="mini">' + (drill.i + 1) + " / " + drill.items.length +
+    '</span><button class="btn sm ghost" data-act="quit">结束</button></div>' +
+    '<div class="progress"><i style="width:' + pct + '%"></i></div>';
+  if (drill.phase === "learn") {
+    main.innerHTML = '<div class="card">' + head +
+      '<span class="pill">新学</span><div class="qbig">' + esc(c.q) + "</div>" +
+      '<div class="ans">' + esc(c.a) + "</div>" +
+      '<p class="mini">先读一遍，出声念一遍，再合上答案默写。第一遍默出来，明天就会再见它。</p>' +
+      '<button class="btn primary block" data-act="towrite">开始默写</button></div>';
+    return;
+  }
+  if (drill.phase === "write") {
+    let hintHTML = "";
+    if (drill.hint) {
+      const parts = c.a.split(/[；;。\n]/).filter(x => x.trim());
+      const head2 = parts.map(p => esc(Array.from(p.trim())[0] || "")).join(" · ");
+      hintHTML = '<div class="hintbox">共 ' + parts.length + " 个要点，首字：" + head2 + "</div>";
+    }
+    main.innerHTML = '<div class="card">' + head +
+      '<span class="pill' + (it.mode === "new" ? "" : " gold") + '">' + (it.mode === "new" ? "新学" : "复习") + "</span>" +
+      '<div class="qbig">' + esc(c.q) + "</div>" +
+      '<div class="mini" style="margin-bottom:6px">' + esc(c.sub) + " · 用你自己的话默出来，按要点给分</div>" +
+      hintHTML +
+      '<textarea id="answerInput" placeholder="在这里默写…（Ctrl+Enter 提交）">' + esc(drill.input) + "</textarea>" +
+      '<div class="row2" style="margin-top:10px">' +
+        '<button class="btn flex1" data-act="hint">提示</button>' +
+        '<button class="btn flex1" data-act="reveal">看答案</button>' +
+        '<button class="btn primary flex1" data-act="submit">提交</button>' +
+      "</div></div>";
+    if (drill.revealed) {
+      main.innerHTML += '<div class="card"><div class="card-head"><span>标准答案</span></div><div class="ans">' + esc(c.a) + "</div>" +
+        '<p class="mini">看过就算了？诚实一点，自己评一下。</p>' + rateHTML(c, true) + "</div>";
+    }
+    return;
+  }
+  // result
+  const r = drill.result || { cover: 0, matched: new Set(), clauses: [] };
+  const pctv = Math.round(r.cover * 100);
+  const cls = pctv >= 85 ? "good" : pctv >= 50 ? "mid" : "bad";
+  main.innerHTML = '<div class="card">' + head +
+    '<div class="qbig" style="font-size:17px">' + esc(c.q) + "</div>" +
+    '<div class="score ' + cls + '">默写覆盖 ' + pctv + "%</div>" +
+    '<div class="progress" style="margin:8px 0 14px"><i style="width:' + pctv + '%;background:' +
+      (cls === "good" ? "var(--accent)" : cls === "mid" ? "var(--gold)" : "var(--warn)") + '"></i></div>' +
+    '<div class="card" style="padding:12px;margin:0 0 12px;background:#faf6ee;box-shadow:none"><div class="ans" style="background:none;padding:0">' +
+      diffHTML(c.a, r.matched) + "</div></div>" +
+    '<div class="mini" style="margin-bottom:4px">你这遍默出来的：' + (esc(drill.input).slice(0, 300) || "（空）") + "</div>" +
+    '<details style="margin-top:8px"><summary>要点命中 ' + r.clauses.filter(x => x.ratio >= 0.75).length + "/" + r.clauses.length + "</summary>" +
+      r.clauses.map(x => '<div class="clause"><span class="cflag ' + (x.ratio >= 0.75 ? "ok" : x.ratio >= 0.35 ? "part" : "no") + '">' +
+        (x.ratio >= 0.75 ? "✓" : x.ratio >= 0.35 ? "△" : "✗") + "</span><span>" + esc(x.text) + "</span></div>").join("") +
+    "</details>" +
+    '<p class="mini" style="margin-top:14px">老实自评一下，决定它下次什么时候回来 👇</p>' +
+    rateHTML(c, false) + "</div>";
+}
+function rateHTML(c, revealed) {
+  const lv3 = dueText(addDays(todayStr(), leaveDays(c, 3)));
+  const lv2 = dueText(addDays(todayStr(), leaveDays(c, 2)));
+  const lv1 = dueText(addDays(todayStr(), leaveDays(c, 1)));
+  return '<div class="rates">' +
+    '<button class="r bad" data-act="rate" data-level="1">忘了<small>' + lv1 + "</small></button>" +
+    '<button class="r mid" data-act="rate" data-level="2">模糊<small>' + lv2 + "</small></button>" +
+    '<button class="r good" data-act="rate" data-level="3">记得<small>' + lv3 + "</small></button></div>";
+}
+function htmlSummary() {
+  const ms = Date.now() - drill.t0;
+  const min = Math.max(1, Math.round(ms / 60000));
+  const acc = drill.total ? Math.round(drill.ok * 100 / drill.total) : 0;
+  const forgot = drill.forgot.map(id => cardById(id)).filter(Boolean);
+  return '<div class="card"><div class="card-head"><span>这一轮结束了</span><span class="mini">用了 ' + min + " 分钟</span></div>" +
+    '<div class="stat"><div><b>' + drill.total + "</b><span>张</span></div>" +
+    "<div><b>" + acc + "%</b><span>记得的比例</span></div>" +
+    "<div><b>" + drill.ok + "</b><span>记得</span></div>" +
+    "<div><b>" + drill.bad + "</b><span>忘了</span></div></div>" +
+    (forgot.length ? '<div style="margin-top:14px"><div class="card-head"><span>这几张明天会回来</span></div>' +
+      forgot.map(c => '<div class="qitem"><div class="qtext">' + esc(c.q) + "</div></div>").join("") + "</div>" : "") +
+    '<div class="row2" style="margin-top:16px"><button class="btn primary flex1" data-act="quit">回今日</button>' +
+    '<button class="btn flex1" data-act="start" data-mode="random">再来一轮</button></div></div>';
+}
+
+/* ============ 弹窗 ============ */
+function openModal(html) { const m = $("#modal"); $("#modalBox").innerHTML = html; m.classList.remove("hidden"); }
+function closeModal() { $("#modal").classList.add("hidden"); }
+
+function openEditor(id) {
+  const c = id ? cardById(id) : null;
+  openModal('<div class="card-head"><span>' + (c ? "编辑" : "新增") + '卡片</span><button class="btn sm ghost" data-act="closeModal">关闭</button></div>' +
+    '<label class="lab">学科</label><input type="text" id="edSub" value="' + esc(c ? c.sub : "教育学") + '"/>' +
+    '<label class="lab">问题（要背的是什么）</label><textarea id="edQ" style="min-height:70px">' + esc(c ? c.q : "") + "</textarea>" +
+    '<label class="lab">答案（标准表述）</label><textarea id="edA" style="min-height:110px">' + esc(c ? c.a : "") + "</textarea>" +
+    '<div class="row2" style="margin-top:12px"><button class="btn primary flex1" data-act="savecard" data-id="' + (c ? c.id : "") + '">保存</button></div>');
+}
+function openImport() {
+  openModal('<div class="card-head"><span>批量导入</span><button class="btn sm ghost" data-act="closeModal">关闭</button></div>' +
+    '<p class="mini" style="margin-top:0">一行一张，问题 | 答案；# 开头行切换学科。重复的问题会自动跳过。</p>' +
+    '<textarea id="bulkText" style="min-height:200px" placeholder="# 教育心理学&#10;负强化是什么？ | 撤销厌恶刺激以增加行为发生的频率"></textarea>' +
+    '<div class="row2" style="margin-top:12px"><button class="btn primary flex1" data-act="doImport">导入</button></div>');
+  setTimeout(() => { const el = $("#bulkText"); if (el) el.focus(); }, 30);
+}
+
+/* ============ 事件 ============ */
+document.addEventListener("click", function (e) {
+  const el = e.target.closest("[data-act]");
+  if (!el) {
+    if (e.target.id === "modal") closeModal();
+    return;
+  }
+  const act = el.dataset.act;
+  if (act === "tab") { state.ui.view = el.dataset.view; render(); }
+  else if (act === "start") { startSession(el.dataset.mode); }
+  else if (act === "towrite") { drill.phase = "write"; render(); }
+  else if (act === "hint") { drill.hint = true; render(); }
+  else if (act === "reveal") { drill.revealed = true; render(); }
+  else if (act === "submit") { submitAnswer(); }
+  else if (act === "rate") { rate(Number(el.dataset.level)); }
+  else if (act === "quit") {
+    if (drill && !drill.done && drill.total > 0 && !confirm("还没做完，确定结束这一轮？")) return;
+    drill = null; state.ui.view = "today"; render();
+  }
+  else if (act === "addcard") openEditor("");
+  else if (act === "editcard") openEditor(el.dataset.id);
+  else if (act === "delcard") {
+    if (!confirm("删掉这张卡？")) return;
+    state.cards = state.cards.filter(c => c.id !== el.dataset.id); save(); render();
+  }
+  else if (act === "practice") {
+    const c = cardById(el.dataset.id);
+    drill = { items: [{ cid: c.id, mode: c.seen ? "review" : "new" }], i: 0, phase: c.seen ? "write" : "learn",
+              input: "", hint: false, revealed: false, result: null, t0: Date.now(), ok: 0, bad: 0, total: 0, forgot: [], done: false };
+    render();
+  }
+  else if (act === "savecard") {
+    const q = $("#edQ").value.trim(), a = $("#edA").value.trim(), sub = $("#edSub").value.trim() || "未分类";
+    if (!q || !a) { toast("问题和答案都要填"); return; }
+    const id = el.dataset.id;
+    if (id) { const c = cardById(id); c.q = q; c.a = a; c.sub = sub; }
+    else state.cards.unshift(newCard(q, a, sub));
+    save(); closeModal(); render(); toast("存好了");
+  }
+  else if (act === "openImport") { closeModal(); openImport(); }
+  else if (act === "closeModal") closeModal();
+  else if (act === "doImport") { doBulkImport(); }
+  else if (act === "saveSettings") { saveSettings(); }
+  else if (act === "export") { exportBackup(); }
+  else if (act === "importJson") { importBackup(); }
+  else if (act === "reset") {
+    if (!confirm("会把所有卡片和进度清空，确定？")) return;
+    if (!confirm("真的确定？清空后只能用备份找回。")) return;
+    localStorage.removeItem(KEY);
+    state = seedState(); save(); drill = null; render(); toast("已重置");
+  }
+});
+
+document.addEventListener("input", function (e) {
+  if (e.target.id === "answerInput") {
+    drill.input = e.target.value;
+    e.target.style.height = "auto";
+    e.target.style.height = Math.max(130, e.target.scrollHeight + 2) + "px";
+  }
+  if (e.target.id === "bankSearch") {
+    state.ui.q = e.target.value;
+    const box = $("#bankList"); if (box) box.innerHTML = bankListHTML();
+  }
+});
+
+document.addEventListener("change", function (e) {
+  if (e.target.id === "bankSub") {
+    state.ui.sub = e.target.value;
+    const box = $("#bankList"); if (box) box.innerHTML = bankListHTML();
+  }
+  if (e.target.id === "importFile") { readBackup(e.target.files[0]); }
+});
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && drill && drill.phase === "write") { e.preventDefault(); submitAnswer(); }
+  if (e.key === "Escape") closeModal();
+});
+
+/* ============ 导入导出 ============ */
+function doBulkImport() {
+  const ta = $("#bulkText");
+  if (!ta) return;
+  const out = [];
+  let sub = "未分类";
+  const lines = ta.value.split(/\r?\n/);
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (/^#/.test(line)) { sub = line.replace(/^#+\s*/, "").trim() || sub; continue; }
+    if (/^\/\//.test(line)) continue;
+    const m = line.split(/\s*(?:\||｜|\t|::)\s*/);
+    if (m.length < 2) continue;
+    const q = m[0].trim(), a = m.slice(1).join(" ").trim();
+    if (q && a) out.push({ q: q, a: a, sub: sub });
+  }
+  if (!out.length) { toast("没解析出内容，检查一下格式"); return; }
+  const exist = new Set(state.cards.map(c => c.q.trim()));
+  let added = 0;
+  out.forEach(x => {
+    if (exist.has(x.q)) return;
+    exist.add(x.q);
+    state.cards.push(newCard(x.q, x.a, x.sub));
+    added++;
+  });
+  save(); closeModal(); render();
+  toast("导入了 " + added + " 张" + (added < out.length ? "，跳过重复 " + (out.length - added) + " 张" : ""));
+}
+function exportBackup() {
+  const data = JSON.stringify({ app: "jiaozong-beishu", version: 1, exportedAt: new Date().toISOString(), state: state }, null, 1);
+  const blob = new Blob([data], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "背书备份-" + todayStr() + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast("备份已下载");
+}
+function importBackup() {
+  openModal('<div class="card-head"><span>导入备份</span><button class="btn sm ghost" data-act="closeModal">关闭</button></div>' +
+    '<p class="mini" style="margin-top:0">会合并进现有题库（同问题跳过），不影响已有进度。</p>' +
+    '<input type="file" id="importFile" accept=".json,application/json"/>');
+}
+function readBackup(file) {
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = function () {
+    try {
+      const obj = JSON.parse(fr.result);
+      const s = obj.state || obj;
+      if (!s || !Array.isArray(s.cards)) throw new Error("bad");
+      const exist = new Set(state.cards.map(c => c.q.trim()));
+      let added = 0;
+      s.cards.forEach(c => {
+        if (!c || !c.q || !c.a) return;
+        if (exist.has(String(c.q).trim())) return;
+        const nc = newCard(c.q, c.a, c.sub || "未分类");
+        if (c.seen) { nc.seen = true; nc.stage = c.stage || 0; nc.due = c.due || addDays(todayStr(), 1); nc.reps = c.reps || 1; }
+        state.cards.push(nc); added++;
+      });
+      save(); closeModal(); render(); toast("合并了 " + added + " 张卡");
+    } catch (e) { toast("这个文件读不出来"); }
+  };
+  fr.readAsText(file);
+}
+function saveSettings() {
+  const n = Math.max(1, Math.min(100, Number($("#setNew").value) || 10));
+  const cap = Math.max(5, Math.min(300, Number($("#setCap").value) || 80));
+  const iv = $("#setIv").value.split(/[,\s，、]+/).map(Number).filter(x => x > 0 && x < 400);
+  if (!iv.length) { toast("间隔至少填一个天数"); return; }
+  state.settings.newPerDay = n;
+  state.settings.reviewCap = cap;
+  state.settings.intervals = iv;
+  save(); render(); toast("设置已保存");
+}
+
+/* ============ 启动 ============ */
+(function boot() {
+  state = loadState();
+  if (!state) { state = seedState(); save(); }
+  render();
+  window.addEventListener("beforeunload", function (e) { if (drill && !drill.done && drill.total > 0) { e.preventDefault(); e.returnValue = ""; } });
+})();
+</script>
+</body>
+</html>
